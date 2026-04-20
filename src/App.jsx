@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { produtos as listaInicial } from './data/produtos';
 import { ProdutoCard } from './Components/ProdutoCard';
+import './App.css'; 
 
 function App() {
     const [produtos, setProdutos] = useState(listaInicial);
     const [nome, setNome] = useState('');
     const [preco, setPreco] = useState('');
+    const [categoria, setCategoria] = useState('Geral');
+    const [termoBusca, setTermoBusca] = useState('');
 
     const adicionarProduto = (e) => {
         e.preventDefault();
@@ -13,76 +16,73 @@ function App() {
             id: Math.random(),
             nome: nome,
             preco: parseFloat(preco),
-            categoria: "Geral",
+            categoria: categoria,
             promocao: false
         };
         setProdutos([...produtos, novo]);
-        setNome('');
-        setPreco('');
+        setNome(''); setPreco('');
     };
 
-    const total = produtos.reduce((acc, p) => acc + p.preco, 0);
+    const removerProduto = (id) => {
+        setProdutos(produtos.filter(p => p.id !== id));
+    };
+
+    const produtosFiltrados = produtos.filter(p => 
+        p.nome.toLowerCase().includes(termoBusca.toLowerCase())
+    );
+
+    const total = produtosFiltrados.reduce((acc, p) => acc + p.preco, 0);
 
     return (
-        /* AJUSTE: Cor alterada para #333 para dar nitidez total nos cards e textos */
-        <div style={{ padding: '20px', fontFamily: 'sans-serif', color: '#333', backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-            
-            <h1 style={{ textAlign: 'center', color: '#222' }}>Catálogo de Produtos - Tech Store</h1>
+        <div className="app-container">
+            <h1 className="titulo-central">Catálogo de Produtos - Unidade 3</h1>
 
-            <form onSubmit={adicionarProduto} style={{ 
-                marginBottom: '30px', 
-                padding: '20px', 
-                background: '#333', 
-                color: 'white', 
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-            }}>
-                <h3 style={{ marginTop: 0 }}>Cadastrar Novo Produto</h3>
+            {/* Formulário Requisito 5 */}
+            <form onSubmit={adicionarProduto} className="form-estilizado">
+                <h3>Cadastrar Novo Produto</h3>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <input 
-                        type="text" 
-                        placeholder="Nome do Produto" 
-                        value={nome} 
-                        onChange={(e) => setNome(e.target.value)} 
-                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flex: 1 }}
-                        required 
-                    />
-                    <input 
-                        type="number" 
-                        placeholder="Preço" 
-                        value={preco} 
-                        onChange={(e) => setPreco(e.target.value)} 
-                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '120px' }}
-                        required 
-                    />
-                    <button type="submit" style={{ 
-                        padding: '8px 20px', 
-                        cursor: 'pointer', 
-                        backgroundColor: '#4CAF50', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '4px',
-                        fontWeight: 'bold'
-                    }}>
+                    <input className="input-field" type="text" placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
+                    <input className="input-field" type="number" placeholder="Preço" value={preco} onChange={(e) => setPreco(e.target.value)} required />
+                    <select className="input-field" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                        <option value="Geral">Geral</option>
+                        <option value="Fotografia">Fotografia</option>
+                        <option value="Lentes">Lentes</option>
+                        <option value="Acessórios">Acessórios</option>
+                    </select>
+                    <button type="submit" style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', padding: '10px', cursor: 'pointer' }}>
                         Adicionar
                     </button>
                 </div>
             </form>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
-                {produtos.map(p => (
-                    <ProdutoCard key={p.id} {...p} />
+            {/* Filtro de Busca - Desafio Extra */}
+            <div style={{ marginBottom: '20px' }}>
+                <input 
+                    className="input-field" 
+                    style={{ width: '100%' }}
+                    type="text" 
+                    placeholder="🔍 Buscar produto por nome..." 
+                    value={termoBusca}
+                    onChange={(e) => setTermoBusca(e.target.value)}
+                />
+            </div>
+
+            {/* Grid de Produtos - Requisito 3 e 4 */}
+            <div className="grid-produtos">
+                {produtosFiltrados.map(p => (
+                    <ProdutoCard key={p.id} {...p}>
+                        {/* Uso de Children - Requisito 2 */}
+                        <button className="btn-remover" onClick={() => removerProduto(p.id)}>
+                            Remover Produto
+                        </button>
+                    </ProdutoCard>
                 ))}
             </div>
 
             <hr style={{ margin: '40px 0', border: '0', borderTop: '1px solid #ccc' }} />
             
-            <div style={{ textAlign: 'right', paddingRight: '20px' }}>
-                <h2 style={{ fontSize: '1.8rem' }}>Total do Catálogo: 
-                    <span style={{ color: '#2e7d32', marginLeft: '10px' }}>
-                        R$ {total.toFixed(2)}
-                    </span>
-                </h2>
+            <div style={{ textAlign: 'right' }}>
+                <h2>Total (Filtrados): R$ {total.toFixed(2)}</h2>
             </div>
         </div>
     );
